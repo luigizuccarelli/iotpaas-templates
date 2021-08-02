@@ -1,0 +1,6 @@
+commonLabels:
+  app: nginx-proxy
+resources:
+  - deployment-config.yaml
+  - service.yaml
+  - route.yaml

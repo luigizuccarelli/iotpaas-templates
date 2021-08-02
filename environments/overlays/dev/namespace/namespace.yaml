@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: iotpaas
+  labels:
+    cost-tenancy: Dedicated
+    dept: Development
+    org: private
+    network-share: private
+    product: iotpaas

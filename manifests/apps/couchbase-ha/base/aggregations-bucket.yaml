@@ -1,0 +1,14 @@
+apiVersion: couchbase.com/v2
+kind: CouchbaseBucket
+metadata:
+  name: aggregations
+spec:
+  name: aggregations
+  memoryQuota: 512Mi
+  replicas: 1
+  ioPriority: high
+  evictionPolicy: valueOnly
+  conflictResolution: lww
+  enableFlush: true
+  enableIndexReplica: true
+  compressionMode: passive

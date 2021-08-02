@@ -1,0 +1,5 @@
+commonLabels:
+  name: iotpaas-message-producer
+resources:
+  - deployment.yaml
+  - service.yaml

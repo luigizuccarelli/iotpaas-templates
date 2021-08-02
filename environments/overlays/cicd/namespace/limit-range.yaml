@@ -1,0 +1,27 @@
+apiVersion: "v1"
+kind: "LimitRange"
+metadata:
+  name: "resource-limits"
+spec:
+  limits:
+    - type: "Pod"
+      max:
+        cpu: "2"
+        memory: "6Gi"
+      min:
+        cpu: "100m"
+        memory: "6Mi"
+    - type: "Container"
+      # it is very import to include a default otherwise builder and deployer pods will not run
+      default:
+        cpu: "200m"
+        memory: "750Mi"
+      defaultRequest:
+        cpu: "200m"
+        memory: "375Mi"
+      max:
+        cpu: "2"
+        memory: "4Gi"
+      min:
+        cpu: "100m"
+        memory: "3Mi"

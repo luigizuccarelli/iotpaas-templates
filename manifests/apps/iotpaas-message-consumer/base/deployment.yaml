@@ -1,0 +1,75 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  labels:
+    app: iotpaas-message-consumer
+    name: iotpaas-message-consumer
+  name: iotpaas-message-consumer
+spec:
+  replicas: 1
+  selector:
+    name: iotpaas-message-consumer
+  strategy:
+    resources: {}
+    rollingParams:
+      intervalSeconds: 1
+      maxSurge: 25%
+      maxUnavailable: 25%
+      timeoutSeconds: 600
+      updatePeriodSeconds: 1
+    type: Rolling
+  template:
+    metadata:
+      labels:
+        app: iotpaas-message-consumer
+        name: iotpaas-message-consumer
+    spec:
+      containers:
+      - env:
+        - name: LOG_LEVEL
+          value: info
+        - name: VERSION
+          value: 1.0.4
+        - name: NAME
+          value: iotpaas-message-consumer
+        - name: COUCHBASE_USER
+          value: Administrator
+        - name: COUCHBASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: database-password
+              name: iotpaas-secret
+        - name: COUCHBASE_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: database-password
+              name: iotpaas-secret
+        - name: COUCHBASE_BUCKET
+          value: iotdata
+        - name: TOPIC
+          value: iotdata
+        image: quay.io/luigizuccarelli/iotpaas-message-consumer:1.16.6
+        imagePullPolicy: Always
+        name: iotpaas-message-consumer
+        ports:
+        - containerPort: 7001
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 100m
+            memory: 100Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      #imagePullSecrets:
+      #- name: quay.registry
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+  test: false
+  triggers:
+  - type: ConfigChange

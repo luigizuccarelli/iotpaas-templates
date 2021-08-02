@@ -1,0 +1,66 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+bases:
+  - ../../../manifests/apps/iotpaas-message-consumer/base/
+  - ../../../manifests/apps/iopaas-message-producer/base/
+
+resources:
+  - namespace/namespace.yaml
+  - shared/iotpaas-secret.yaml
+  
+namespace: iotpaas
+
+
+patchesJson6902:
+  # message-consumer patches
+  - path: patches/patch-message-consumer-resources.yaml
+    target:
+      group: apps
+      kind: Deployment
+      name: iotpaas-message-consumer
+      version: v1
+  - path: patches/patch-message-consumer-replicas.yaml
+    target:
+      group: apps
+      kind: Deployment
+      name: iotpaas-message-consumer
+      version: v1
+  - path: patches/patch-message-consumer-image.yaml
+    target:
+      group: apps
+      kind: Deployment
+      name: iotpaas-message-consumer
+      version: v1
+  - path: patches/patch-message-consumer-env.yaml
+    target:
+      group: apps
+      kind: Deployment
+      name: iotpaas-message-consumer
+      version: v1
+
+  # message-producer patches
+  - path: patches/patch-message-producer-resources.yaml
+    target:
+      group: apps
+      kind: Deployment
+      name: iotpaas-message-producer
+      version: v1
+  - path: patches/patch-message-producer-replicas.yaml
+    target:
+      group: apps
+      kind: Deployment
+      name: iotpaas-message-producer
+      version: v1
+  - path: patches/patch-message-producer-image.yaml
+    target:
+      group: apps
+      kind: Deployment
+      name: iotpaas-message-producer
+      version: v1
+  - path: patches/patch-message-producer-env.yaml
+    target:
+      group: apps
+      kind: Deployment
+      name: iotpaas-message-producer
+      version: v1
+

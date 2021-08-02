@@ -1,0 +1,11 @@
+- op: add
+  path: "/spec/template/spec/containers/0/env/-"
+  value:
+    name: KAFKA_BROKERS
+    value: kafka-ha-cluster-kafka-brokers.devops-shared-threefld:9092
+  
+- op: add
+  path: "/spec/template/spec/containers/0/env/-"
+  value:
+    name: NOOP
+    value: noop1

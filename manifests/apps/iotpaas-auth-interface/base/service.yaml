@@ -1,0 +1,15 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: authentication
+spec:
+  ports:
+    - name: authentication-service-port
+      protocol: TCP
+      port: 3000
+      targetPort: 3000
+  selector:
+    name: authentication
+  type: ClusterIP
+  sessionAffinity: None
+

@@ -1,0 +1,135 @@
+kind: DeploymentConfig
+apiVersion: apps.openshift.io/v1
+metadata:
+  labels:
+    app: authentication-microservice
+    name: authentication
+  name: authentication
+spec:
+  replicas: 1
+  selector:
+    name: authentication
+  strategy:
+    activeDeadlineSeconds: 21600
+    resources: {}
+    rollingParams:
+      intervalSeconds: 1
+      maxSurge: 25%
+      maxUnavailable: 25%
+      timeoutSeconds: 600
+      updatePeriodSeconds: 1
+    type: Rolling
+  template:
+    metadata:
+      labels:
+        app: authentication-microservice
+        name: authentication
+    spec:
+      containers:
+      - env:
+        - name: AUTHENTICATION_SERVICE_MONGODB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: mongo-password
+              name: trackmate-secret
+        - name: NAME
+          value: authentication
+        - name: AUTHENTICATION_SERVICE_MONGODB_USER
+          valueFrom:
+            secretKeyRef:
+              key: mongo-username
+              name: trackmate-secret
+        - name: AUTHENTICATION_SERVICE_ENV
+          value: development
+        - name: AUTHENTICATION_SERVICE_MONGODB_AFFILIATE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: mongo-affiliate-password
+              name: trackmate-secret
+        - name: AUTHENTICATION_SERVICE_MONGODB_AFFILIATE_USER
+          valueFrom:
+            secretKeyRef:
+              key: mongo-affiliate-user
+              name: trackmate-secret
+        - name: AUTHENTICATION_SERVICE_MONGODB_SERVICE_PORT
+          value: "27017"
+        - name: AUTHENTICATION_SERVICE_MONGODB_SERVICE_HOST
+          valueFrom:
+            secretKeyRef:
+              key: mongo-host
+              name: trackmate-secret
+        - name: AUTHENTICATION_SERVICE_ADMIN_USER_PASSWORD_FAN
+          value: xerufokaxi10
+        - name: AUTHENTICATION_SERVICE_ADMIN_USER_PASSWORD_BARRY
+          value: fecikiteho80
+        - name: AUTHENTICATION_SERVICE_ADMIN_USER_PASSWORD_LUIGI
+          value: vukofazeyo93
+        - name: AUTHENTICATION_SERVICE_JWT_REFRESH_TOKEN_SECRET
+          valueFrom:
+            secretKeyRef:
+              key: JWT_REFRESH_TOKEN_SECRET
+              name: trackmate-secret
+        - name: AUTHENTICATION_SERVICE_JWT_ACCESS_TOKEN_SECRET
+          valueFrom:
+            secretKeyRef:
+              key: JWT_ACCESS_TOKEN_SECRET
+              name: trackmate-secret
+        - name: AUTHENTICATION_SERVICE_SESSION_SECRET
+          valueFrom:
+            secretKeyRef:
+              key: session-secret
+              name: trackmate-secret
+        - name: AUTHENTICATION_SERVICE_PASSPORT_SECRET
+          valueFrom:
+            secretKeyRef:
+              key: passport-secret
+              name: trackmate-secret
+        - name: AUTHENTICATION_SERVICE_SEED_ADMIN_USERS
+          value: "false"
+        - name: AUTHENTICATION_SERVICE_AFFILIATE_JWT_ACCESS_TOKEN_SECRET
+          valueFrom:
+            secretKeyRef:
+              key: JWT_ACCESS_TOKEN_SECRET
+              name: trackmate-secret
+        - name: AUTHENTICATION_SERVICE_NEWMARKETGROUP_JWT_REFRESH_TOKEN_SECRET
+          valueFrom:
+            secretKeyRef:
+              key: NEWMARKETGROUP_JWT_REFRESH_TOKEN_SECRET
+              name: trackmate-secret
+        - name: AUTHENTICATION_SERVICE_NEWMARKETGROUP_JWT_ACCESS_TOKEN_SECRET
+          valueFrom:
+            secretKeyRef:
+              key: NEWMARKETGROUP_JWT_ACCESS_TOKEN_SECRET
+              name: trackmate-secret
+        - name: AUTHENTICATION_SERVICE_REDIS_SERVICE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: database-password
+              name: redis
+        - name: AUTHENTICATION_SERVICE_REDIS_SERVICE_PORT
+          value: "6379"
+        image: quay.io/14west/trackmate-authentication-service:1.0.1
+        imagePullPolicy: Always
+        name: authentication
+        ports:
+        - containerPort: 3000
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 200m
+            memory: 200Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      imagePullSecrets:
+      - name: quay.registry
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+  test: false
+  triggers:
+  - type: ConfigChange

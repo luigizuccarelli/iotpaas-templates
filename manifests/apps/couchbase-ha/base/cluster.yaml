@@ -1,0 +1,76 @@
+apiVersion: couchbase.com/v2
+kind: CouchbaseCluster
+metadata:
+  name: cluster
+spec:
+  #https://docs.couchbase.com/operator/current/reference-couchbasecluster.html
+  image: couchbase/server:6.5.0
+  security:
+    adminSecret: cb-ha-auth
+  platform: aws
+  cluster:
+    clusterName: cb-ha-cluster
+    dataServiceMemoryQuota: 3Gi
+    indexServiceMemoryQuota: 512Mi
+    searchServiceMemoryQuota: 512Mi
+    eventingServiceMemoryQuota: 512Mi
+    analyticsServiceMemoryQuota: 2Gi
+    indexStorageSetting: memory_optimized
+    autoFailoverTimeout: 2m0s
+    autoFailoverMaxCount: 3
+    autoFailoverOnDataDiskIssues: true
+    autoFailoverOnDataDiskIssuesTimePeriod: 2m0s
+    autoCompaction:
+      databaseFragmentationThreshold:
+        percent: 30
+        size: 1Gi
+      viewFragmentationThreshold:
+        percent: 30
+        size: 1Gi
+      timeWindow:
+        start: 02:00
+        end: 06:00
+        abortCompactionOutsideWindow: true
+      tombstonePurgeInterval: 72h0m0s
+  buckets:
+    managed: true
+  networking:
+    exposeAdminConsole: true
+    adminConsoleServiceType: NodePort
+    adminConsoleServices:
+      - data
+  logging:
+    logRetentionTime: 604800s
+    logRetentionCount: 20
+  servers:
+    - size: 3
+      name: all_services
+      services:
+      - data
+      - index
+      - query
+      - search
+      - eventing
+      - analytics
+      resources:
+        limits:
+          cpu: "2.5"
+          memory: 8Gi
+        requests:
+          cpu: "1"
+          memory: 8Gi
+      volumeMounts:
+        default: cb-ha-cluster-storage
+        data:  cb-ha-cluster-storage
+        index: cb-ha-cluster-storage
+        analytics:
+        - cb-ha-cluster-storage
+        - cb-ha-cluster-storage
+  volumeClaimTemplates:
+  - metadata:
+      name: cb-ha-cluster-storage
+    spec:
+      storageClassName: "gp2"
+      resources:
+        requests:
+          storage: 5Gi

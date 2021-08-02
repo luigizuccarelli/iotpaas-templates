@@ -1,0 +1,16 @@
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: route
+  labels:
+    couchbase_cluster: cb-ha-cluster
+spec:
+  to:
+    kind: Service
+    name: cb-ha-cluster-ui
+    weight: 100
+  port:
+    targetPort: couchbase-ui
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect

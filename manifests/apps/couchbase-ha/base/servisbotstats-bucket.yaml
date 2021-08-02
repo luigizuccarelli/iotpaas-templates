@@ -1,0 +1,14 @@
+apiVersion: couchbase.com/v2
+kind: CouchbaseBucket
+metadata:
+  name: servisbotstats
+spec:
+  name: servisbotstats
+  memoryQuota: 256Mi
+  replicas: 1
+  ioPriority: high
+  evictionPolicy: valueOnly
+  conflictResolution: lww
+  enableFlush: true
+  enableIndexReplica: true
+  compressionMode: passive

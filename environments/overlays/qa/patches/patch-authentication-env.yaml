@@ -1,0 +1,47 @@
+- op: add
+  path: "/spec/template/spec/containers/0/env/-"
+  value:
+    name: AUTHENTICATION_SERVICE_MONGODB_REPLICA_SET_CONNECTION_STRING
+    value: mongodb-ha-service.devops-shared-threefld:27017
+
+- op: add
+  path: "/spec/template/spec/containers/0/env/-"
+  value:
+    name: AUTHENTICATION_SERVICE_MONGODB_SERVICE_CLUSTER_HOST
+    value: mongodb-ha-service-internal.devops-shared-threefld
+
+- op: add
+  path: "/spec/template/spec/containers/0/env/-"
+  value:
+    name: AUTHENTICATION_SERVICE_AFFILIATE_API
+    value: affiliate.14west-trackmate-qa
+
+- op: add
+  path: "/spec/template/spec/containers/0/env/-"
+  value:
+    name: AUTHENTICATION_SERVICE_REDIS_SERVICE_HOST
+    value: redis.14west-trackmate-qa
+
+- op: add
+  path: "/spec/template/spec/containers/0/env/-"
+  value:
+    name: AUTHENTICATION_SERVICE_SOUTHBANK_JWT_ACCESS_TOKEN_SECRET
+    valueFrom:
+          secretKeyRef:
+            key: AUTHENTICATION_SERVICE_SOUTHBANK_JWT_ACCESS_TOKEN_SECRET
+            name: trackmate-secret
+
+- op: add
+  path: "/spec/template/spec/containers/0/env/-"
+  value:
+    name: AUTHENTICATION_SERVICE_SOUTHBANK_JWT_REFRESH_TOKEN_SECRET
+    valueFrom:
+          secretKeyRef:
+            key: AUTHENTICATION_SERVICE_SOUTHBANK_JWT_REFRESH_TOKEN_SECRET
+            name: trackmate-secret
+
+- op: add
+  path: "/spec/template/spec/containers/0/env/-"
+  value:
+    name: AUTHENTICATION_SERVICE_NOOP
+    value: noop1

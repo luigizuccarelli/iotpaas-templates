@@ -1,0 +1,16 @@
+namePrefix: cb-ha-
+commonLabels:
+  app: cb-ha
+resources:
+  - auth-secret.yaml
+  - cluster.yaml
+  - analytics-bucket.yaml
+  - statistics-bucket.yaml
+  - route.yaml
+  - metadata-bucket.yaml
+  - operations-bucket.yaml
+  - aggregations-bucket.yaml
+  - agoracxp-bucket.yaml
+  - agoracxpaux-bucket.yaml
+  - agoracxpjobs-bucket.yaml
+  - servisbotstats-bucket.yaml

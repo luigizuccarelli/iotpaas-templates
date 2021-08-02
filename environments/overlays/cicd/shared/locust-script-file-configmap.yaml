@@ -1,0 +1,235 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: script-file
+  labels:
+    template: locust
+data:
+  locustfile.py: "from locust import HttpUser, task, between, events\nimport json\nimport
+    uuid\nimport random\nimport logging\nfrom datetime import datetime\n\n\n@events.quitting.add_listener\ndef
+    _(environment, **kw):\n    if environment.stats.total.fail_ratio > 0.01:\n        logging.error(\"Test
+    failed due to failure ratio > 1%\")\n        environment.process_exit_code = 1\n
+    \   elif environment.stats.total.avg_response_time > 200:\n        logging.error(\"Test
+    failed due to average response time ratio > 200 ms\")\n        environment.process_exit_code
+    = 1\n    elif environment.stats.total.get_response_time_percentile(0.95) > 800:\n
+    \       logging.error(\"Test failed due to 95th percentile response time > 800
+    ms\")\n        environment.process_exit_code = 1\n    else:\n        environment.process_exit_code
+    = 0\n\n\ndef print_resp(response):\n    print(\"Response status code:\", response.status_code)\n\n\ndef
+    now_utc():\n    now = datetime.now().isoformat()\n    now += \"Z\"\n    return
+    now\n\n\ndef post_event(event, affiliate_id, campaign_id, journey_id):\n    message_id
+    = uuid.uuid4().hex\n    event[\"timestamp\"] = now_utc()\n    event[\"message_id\"]
+    = message_id\n    event[\"journey_id\"] = journey_id\n\n    if \"affiliate_id\"
+    in event[\"utm_variable\"]:\n        event[\"affiliate_id\"] = affiliate_id\n
+    \       event[\"utm_variable\"][\"affiliate_id\"] = affiliate_id\n\n    if \"utm_campaign\"
+    in event[\"utm_variable\"]:\n        event[\"utm_variable\"][\"utm_campaign\"]
+    = campaign_id\n\n    postbody = json.dumps(event)\n    return postbody\n\n\nclass
+    MyUser(HttpUser):\n    wait_time = between(2, 5)\n\n    @task()\n    def index(self):\n
+    \       test_url = \"/api/v1/streamdata\"\n        headers = {'content-type':
+    'application/json'}\n        platforms = [\"fc\", \"wmc\"]\n        platform =
+    random.choice(platforms)\n        affiliates = [\"southbank\", \"newmarketgroup\"]\n
+    \       affiliate_id = random.choice(affiliates)\n        campaigns = [\"spring_sale\",
+    \"summer_sale\", \"autumn_sale\", \"winter_sale\"]\n        campaign_id = random.choice(campaigns)\n
+    \       userAgents = [\n          \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6)
+    AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/86.0.4240.80 Safari/537.36\",\n
+    \         \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML,
+    like Gecko) Chrome/85.0.4183.121 Safari/537.36\",\n          \"Mozilla/5.0 (X11;
+    Fedora; Linux x86_64; rv:76.0) Gecko/20100101 Firefox/76.0\",\n          \"Mozilla/5.0
+    (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.121
+    Safari/537.36\",\n          \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)
+    AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.80 Safari/537.36\",\n
+    \         \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36
+    (KHTML, like Gecko) Chrome/85.0.4183.121 Safari/537.36 OPR/71.0.3770.228\",\n
+    \         \"Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like
+    Gecko) Chrome/85.0.4183.121 Safari/537.36\",\n          \"Mozilla/5.0 (Macintosh;
+    Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.80
+    Safari/537.36\",\n          \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)
+    AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36\",\n
+    \         \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML,
+    like Gecko) Chrome/86.0.4240.75 Safari/537.36\"\n        ]\n        userAgent
+    = random.choice(userAgents)\n        journey_id = uuid.uuid4().hex\n\n        events
+    = [       \n          [\n            { \"type\": \"\", \"page\": { \"referrer\":
+    \"\", \"url\": \"https://firebasestorage.googleapis.com/v0/b/trackmate-qa.appspot.com/o/index.html?alt=media&page_n=landing&utm_source=Google&utm_medium=cpc&utm_campaign={}&utm_term=testing&utm_content=logolink&affiliate_id={}\".format(campaign_id,
+    affiliate_id) }, \"platform\": platform, \"spec\": \"page\", \"userAgent\": userAgent,
+    \"utm_variable\": { \"affiliate_id\": \"\", \"alt\": \"media\", \"page_n\": \"landing\",
+    \"utm_campaign\": \"\", \"utm_content\": \"logolink\", \"utm_medium\": \"cpc\",
+    \"utm_source\": \"Google\", \"utm_term\": \"testing\" } },\n            { \"type\":
+    \"scroll_depth\", \"data\": [ { \"label\": \"%\", \"value\": 20 } ], \"page\":
+    { \"referrer\": \"\", \"url\": \"https://firebasestorage.googleapis.com/v0/b/trackmate-qa.appspot.com/o/index.html?alt=media&page_n=landing&utm_source=Google&utm_medium=cpc&utm_campaign={}&utm_term=testing&utm_content=logolink&affiliate_id={}\".format(campaign_id,
+    affiliate_id) }, \"platform\": platform, \"spec\": \"track_event\", \"utm_variable\":
+    { \"affiliate_id\": \"\", \"alt\": \"media\", \"page_n\": \"landing\", \"utm_campaign\":
+    \"\", \"utm_content\": \"logolink\", \"utm_medium\": \"cpc\", \"utm_source\":
+    \"Google\", \"utm_term\": \"testing\" } },\n            { \"type\": \"scroll_depth\",
+    \"data\": [ { \"label\": \"%\", \"value\": 40 } ], \"page\": { \"referrer\": \"\",
+    \"url\": \"https://firebasestorage.googleapis.com/v0/b/trackmate-qa.appspot.com/o/index.html?alt=media&page_n=landing&utm_source=Google&utm_medium=cpc&utm_campaign={}&utm_term=testing&utm_content=logolink&affiliate_id={}\".format(campaign_id,
+    affiliate_id) }, \"platform\": platform, \"spec\": \"track_event\", \"utm_variable\":
+    { \"affiliate_id\": \"\", \"alt\": \"media\", \"page_n\": \"landing\", \"utm_campaign\":
+    \"\", \"utm_content\": \"logolink\", \"utm_medium\": \"cpc\", \"utm_source\":
+    \"Google\", \"utm_term\": \"testing\" } },\n            { \"type\": \"scroll_depth\",
+    \"data\": [ { \"label\": \"%\", \"value\": 60 } ], \"page\": { \"referrer\": \"\",
+    \"url\": \"https://firebasestorage.googleapis.com/v0/b/trackmate-qa.appspot.com/o/index.html?alt=media&page_n=landing&utm_source=Google&utm_medium=cpc&utm_campaign={}&utm_term=testing&utm_content=logolink&affiliate_id={}\".format(campaign_id,
+    affiliate_id) }, \"platform\": platform, \"spec\": \"track_event\", \"utm_variable\":
+    { \"affiliate_id\": \"\", \"alt\": \"media\", \"page_n\": \"landing\", \"utm_campaign\":
+    \"\", \"utm_content\": \"logolink\", \"utm_medium\": \"cpc\", \"utm_source\":
+    \"Google\", \"utm_term\": \"testing\" } },\n            { \"type\": \"scroll_depth\",
+    \"data\": [ { \"label\": \"%\", \"value\": 80 } ], \"page\": { \"referrer\": \"\",
+    \"url\": \"https://firebasestorage.googleapis.com/v0/b/trackmate-qa.appspot.com/o/index.html?alt=media&page_n=landing&utm_source=Google&utm_medium=cpc&utm_campaign={}&utm_term=testing&utm_content=logolink&affiliate_id={}\".format(campaign_id,
+    affiliate_id) }, \"platform\": platform, \"spec\": \"track_event\", \"utm_variable\":
+    { \"affiliate_id\": \"\", \"alt\": \"media\", \"page_n\": \"landing\", \"utm_campaign\":
+    \"\", \"utm_content\": \"logolink\", \"utm_medium\": \"cpc\", \"utm_source\":
+    \"Google\", \"utm_term\": \"testing\" } },\n            { \"type\": \"scroll_depth\",
+    \"data\": [ { \"label\": \"%\", \"value\": 100 } ], \"page\": { \"referrer\":
+    \"\", \"url\": \"https://firebasestorage.googleapis.com/v0/b/trackmate-qa.appspot.com/o/index.html?alt=media&page_n=landing&utm_source=Google&utm_medium=cpc&utm_campaign={}&utm_term=testing&utm_content=logolink&affiliate_id={}\".format(campaign_id,
+    affiliate_id) }, \"platform\": platform, \"spec\": \"track_event\", \"utm_variable\":
+    { \"affiliate_id\": \"\", \"alt\": \"media\", \"page_n\": \"landing\", \"utm_campaign\":
+    \"\", \"utm_content\": \"logolink\", \"utm_medium\": \"cpc\", \"utm_source\":
+    \"Google\", \"utm_term\": \"testing\" } },\n            { \"type\": \"link\",
+    \"data\": [ { \"label\": \"link\", \"value\": \"https://sales2.14west.us/trackmate_funnel_1\"
+    } ], \"page\": { \"referrer\": \"\", \"url\": \"https://firebasestorage.googleapis.com/v0/b/trackmate-qa.appspot.com/o/index.html?alt=media&page_n=landing&utm_source=Google&utm_medium=cpc&utm_campaign={}&utm_term=testing&utm_content=logolink&affiliate_id={}\".format(campaign_id,
+    affiliate_id) }, \"platform\": platform, \"spec\": \"track_event\", \"utm_variable\":
+    { \"affiliate_id\": \"\", \"alt\": \"media\", \"page_n\": \"landing\", \"utm_campaign\":
+    \"\", \"utm_content\": \"logolink\", \"utm_medium\": \"cpc\", \"utm_source\":
+    \"Google\", \"utm_term\": \"testing\" } },\n            { \"type\": \"time_on_page\",
+    \"data\": [ { \"label\": \"ms\", \"value\": 6823 } ], \"page\": { \"referrer\":
+    \"\", \"url\": \"https://firebasestorage.googleapis.com/v0/b/trackmate-qa.appspot.com/o/index.html?alt=media&page_n=landing&utm_source=Google&utm_medium=cpc&utm_campaign={}&utm_term=testing&utm_content=logolink&affiliate_id={}\".format(campaign_id,
+    affiliate_id) }, \"platform\": platform, \"spec\": \"track_event\", \"utm_variable\":
+    { \"affiliate_id\": \"\", \"alt\": \"media\", \"page_n\": \"landing\", \"utm_campaign\":
+    \"\", \"utm_content\": \"logolink\", \"utm_medium\": \"cpc\", \"utm_source\":
+    \"Google\", \"utm_term\": \"testing\" } },\n            { \"type\": \"\", \"page\":
+    { \"referrer\": \"https://firebasestorage.googleapis.com/v0/b/trackmate-qa.appspot.com/o/index.html?alt=media&page_n=landing&utm_source=Google&utm_medium=cpc&utm_campaign={}&utm_term=testing&utm_content=logolink&affiliate_id={}\".format(campaign_id,
+    affiliate_id), \"url\": \"https://mag2.14west.us/trackmate_order_page_aw?funnelitemid=13251&choiceparams[0][sku]=OP_637308403401860260.82209&choiceparams[0][item_ids][0]=9221&sessionid=d758cb48-1492-4206-a8ad-10d207ffe8c8&prepop=0&return=https%3A%2F%2Fsales2.14west.us%2FProcessOrderResults%2F578%2F1%3Fpage_n%3Dupsell_1%26tmid%3De026225c-6737-4c12-baee-08e5d5dbad90&status=delay&page_n=order_f&tmid=e026225c-6737-4c12-baee-08e5d5dbad90\"
+    }, \"platform\": platform, \"spec\": \"page\", \"userAgent\": userAgent, \"utm_variable\":
+    { \"choiceparams[0][item_ids][0]\": \"9221\", \"choiceparams[0][sku]\": \"OP_637308403401860260.82209\",
+    \"funnelitemid\": \"13251\", \"page_n\": \"order_f\", \"prepop\": \"0\", \"return\":
+    \"https://sales2.14west.us/ProcessOrderResults/578/1?page_n=upsell_1&tmid=e026225c-6737-4c12-baee-08e5d5dbad90\",
+    \"sessionid\": \"d758cb48-1492-4206-a8ad-10d207ffe8c8\", \"status\": \"delay\"
+    } },\n            { \"type\": \"scroll_depth\", \"data\": [ { \"label\": \"%\",
+    \"value\": 20 } ], \"page\": { \"referrer\": \"https://firebasestorage.googleapis.com/v0/b/trackmate-qa.appspot.com/o/index.html?alt=media&page_n=landing&utm_source=Google&utm_medium=cpc&utm_campaign={}&utm_term=testing&utm_content=logolink&affiliate_id={}\".format(campaign_id,
+    affiliate_id), \"url\": \"https://mag2.14west.us/trackmate_order_page_aw?funnelitemid=13251&choiceparams[0][sku]=OP_637308403401860260.82209&choiceparams[0][item_ids][0]=9221&sessionid=d758cb48-1492-4206-a8ad-10d207ffe8c8&prepop=0&return=https%3A%2F%2Fsales2.14west.us%2FProcessOrderResults%2F578%2F1%3Fpage_n%3Dupsell_1%26tmid%3De026225c-6737-4c12-baee-08e5d5dbad90&status=delay&page_n=order_f&tmid=e026225c-6737-4c12-baee-08e5d5dbad90\"
+    }, \"platform\": platform, \"spec\": \"track_event\", \"utm_variable\": { \"choiceparams[0][item_ids][0]\":
+    \"9221\", \"choiceparams[0][sku]\": \"OP_637308403401860260.82209\", \"funnelitemid\":
+    \"13251\", \"page_n\": \"order_f\", \"prepop\": \"0\", \"return\": \"https://sales2.14west.us/ProcessOrderResults/578/1?page_n=upsell_1&tmid=e026225c-6737-4c12-baee-08e5d5dbad90\",
+    \"sessionid\": \"d758cb48-1492-4206-a8ad-10d207ffe8c8\", \"status\": \"delay\"
+    } },\n            { \"type\": \"scroll_depth\", \"data\": [ { \"label\": \"%\",
+    \"value\": 50 } ], \"page\": { \"referrer\": \"https://firebasestorage.googleapis.com/v0/b/trackmate-qa.appspot.com/o/index.html?alt=media&page_n=landing&utm_source=Google&utm_medium=cpc&utm_campaign={}&utm_term=testing&utm_content=logolink&affiliate_id={}\".format(campaign_id,
+    affiliate_id), \"url\": \"https://mag2.14west.us/trackmate_order_page_aw?funnelitemid=13251&choiceparams[0][sku]=OP_637308403401860260.82209&choiceparams[0][item_ids][0]=9221&sessionid=d758cb48-1492-4206-a8ad-10d207ffe8c8&prepop=0&return=https%3A%2F%2Fsales2.14west.us%2FProcessOrderResults%2F578%2F1%3Fpage_n%3Dupsell_1%26tmid%3De026225c-6737-4c12-baee-08e5d5dbad90&status=delay&page_n=order_f&tmid=e026225c-6737-4c12-baee-08e5d5dbad90\"
+    }, \"platform\": platform, \"spec\": \"track_event\", \"utm_variable\": { \"choiceparams[0][item_ids][0]\":
+    \"9221\", \"choiceparams[0][sku]\": \"OP_637308403401860260.82209\", \"funnelitemid\":
+    \"13251\", \"page_n\": \"order_f\", \"prepop\": \"0\", \"return\": \"https://sales2.14west.us/ProcessOrderResults/578/1?page_n=upsell_1&tmid=e026225c-6737-4c12-baee-08e5d5dbad90\",
+    \"sessionid\": \"d758cb48-1492-4206-a8ad-10d207ffe8c8\", \"status\": \"delay\"
+    } },\n            { \"type\": \"scroll_depth\", \"data\": [ { \"label\": \"%\",
+    \"value\": 80 } ], \"page\": { \"referrer\": \"https://firebasestorage.googleapis.com/v0/b/trackmate-qa.appspot.com/o/index.html?alt=media&page_n=landing&utm_source=Google&utm_medium=cpc&utm_campaign={}&utm_term=testing&utm_content=logolink&affiliate_id={}\".format(campaign_id,
+    affiliate_id), \"url\": \"https://mag2.14west.us/trackmate_order_page_aw?funnelitemid=13251&choiceparams[0][sku]=OP_637308403401860260.82209&choiceparams[0][item_ids][0]=9221&sessionid=d758cb48-1492-4206-a8ad-10d207ffe8c8&prepop=0&return=https%3A%2F%2Fsales2.14west.us%2FProcessOrderResults%2F578%2F1%3Fpage_n%3Dupsell_1%26tmid%3De026225c-6737-4c12-baee-08e5d5dbad90&status=delay&page_n=order_f&tmid=e026225c-6737-4c12-baee-08e5d5dbad90\"
+    }, \"platform\": platform, \"spec\": \"track_event\", \"utm_variable\": { \"choiceparams[0][item_ids][0]\":
+    \"9221\", \"choiceparams[0][sku]\": \"OP_637308403401860260.82209\", \"funnelitemid\":
+    \"13251\", \"page_n\": \"order_f\", \"prepop\": \"0\", \"return\": \"https://sales2.14west.us/ProcessOrderResults/578/1?page_n=upsell_1&tmid=e026225c-6737-4c12-baee-08e5d5dbad90\",
+    \"sessionid\": \"d758cb48-1492-4206-a8ad-10d207ffe8c8\", \"status\": \"delay\"
+    } },\n            { \"type\": \"scroll_depth\", \"data\": [ { \"label\": \"%\",
+    \"value\": 90 } ], \"page\": { \"referrer\": \"https://firebasestorage.googleapis.com/v0/b/trackmate-qa.appspot.com/o/index.html?alt=media&page_n=landing&utm_source=Google&utm_medium=cpc&utm_campaign={}&utm_term=testing&utm_content=logolink&affiliate_id={}\".format(campaign_id,
+    affiliate_id), \"url\": \"https://mag2.14west.us/trackmate_order_page_aw?funnelitemid=13251&choiceparams[0][sku]=OP_637308403401860260.82209&choiceparams[0][item_ids][0]=9221&sessionid=d758cb48-1492-4206-a8ad-10d207ffe8c8&prepop=0&return=https%3A%2F%2Fsales2.14west.us%2FProcessOrderResults%2F578%2F1%3Fpage_n%3Dupsell_1%26tmid%3De026225c-6737-4c12-baee-08e5d5dbad90&status=delay&page_n=order_f&tmid=e026225c-6737-4c12-baee-08e5d5dbad90\"
+    }, \"platform\": platform, \"spec\": \"track_event\", \"utm_variable\": { \"choiceparams[0][item_ids][0]\":
+    \"9221\", \"choiceparams[0][sku]\": \"OP_637308403401860260.82209\", \"funnelitemid\":
+    \"13251\", \"page_n\": \"order_f\", \"prepop\": \"0\", \"return\": \"https://sales2.14west.us/ProcessOrderResults/578/1?page_n=upsell_1&tmid=e026225c-6737-4c12-baee-08e5d5dbad90\",
+    \"sessionid\": \"d758cb48-1492-4206-a8ad-10d207ffe8c8\", \"status\": \"delay\"
+    } },\n            { \"type\": \"checkbox\", \"data\": [ { \"label\": \"autorenew\",
+    \"value\": \"true\" } ], \"page\": { \"referrer\": \"https://firebasestorage.googleapis.com/v0/b/trackmate-qa.appspot.com/o/index.html?alt=media&page_n=landing&utm_source=Google&utm_medium=cpc&utm_campaign={}&utm_term=testing&utm_content=logolink&affiliate_id={}\".format(campaign_id,
+    affiliate_id), \"url\": \"https://mag2.14west.us/trackmate_order_page_aw?funnelitemid=13251&choiceparams[0][sku]=OP_637308403401860260.82209&choiceparams[0][item_ids][0]=9221&sessionid=d758cb48-1492-4206-a8ad-10d207ffe8c8&prepop=0&return=https%3A%2F%2Fsales2.14west.us%2FProcessOrderResults%2F578%2F1%3Fpage_n%3Dupsell_1%26tmid%3De026225c-6737-4c12-baee-08e5d5dbad90&status=delay&page_n=order_f&tmid=e026225c-6737-4c12-baee-08e5d5dbad90\"
+    }, \"platform\": platform, \"spec\": \"track_event\", \"utm_variable\": { \"choiceparams[0][item_ids][0]\":
+    \"9221\", \"choiceparams[0][sku]\": \"OP_637308403401860260.82209\", \"funnelitemid\":
+    \"13251\", \"page_n\": \"order_f\", \"prepop\": \"0\", \"return\": \"https://sales2.14west.us/ProcessOrderResults/578/1?page_n=upsell_1&tmid=e026225c-6737-4c12-baee-08e5d5dbad90\",
+    \"sessionid\": \"d758cb48-1492-4206-a8ad-10d207ffe8c8\", \"status\": \"delay\"
+    } },\n            { \"type\": \"form_submit\", \"data\": [ { \"label\": \"username\",
+    \"value\": \"nightwatch-automation@somefakeemail.com\" } ], \"page\": { \"referrer\":
+    \"https://firebasestorage.googleapis.com/v0/b/trackmate-qa.appspot.com/o/index.html?alt=media&page_n=landing&utm_source=Google&utm_medium=cpc&utm_campaign={}&utm_term=testing&utm_content=logolink&affiliate_id={}\".format(campaign_id,
+    affiliate_id), \"url\": \"https://mag2.14west.us/trackmate_order_page_aw?funnelitemid=13251&choiceparams[0][sku]=OP_637308403401860260.82209&choiceparams[0][item_ids][0]=9221&sessionid=d758cb48-1492-4206-a8ad-10d207ffe8c8&prepop=0&return=https%3A%2F%2Fsales2.14west.us%2FProcessOrderResults%2F578%2F1%3Fpage_n%3Dupsell_1%26tmid%3De026225c-6737-4c12-baee-08e5d5dbad90&status=delay&page_n=order_f&tmid=e026225c-6737-4c12-baee-08e5d5dbad90\"
+    }, \"platform\": platform, \"spec\": \"track_event\", \"utm_variable\": { \"choiceparams[0][item_ids][0]\":
+    \"9221\", \"choiceparams[0][sku]\": \"OP_637308403401860260.82209\", \"funnelitemid\":
+    \"13251\", \"page_n\": \"order_f\", \"prepop\": \"0\", \"return\": \"https://sales2.14west.us/ProcessOrderResults/578/1?page_n=upsell_1&tmid=e026225c-6737-4c12-baee-08e5d5dbad90\",
+    \"sessionid\": \"d758cb48-1492-4206-a8ad-10d207ffe8c8\", \"status\": \"delay\"
+    } },\n            { \"type\": \"time_on_page\", \"data\": [ { \"label\": \"ms\",
+    \"value\": 13347 } ], \"page\": { \"referrer\": \"https://firebasestorage.googleapis.com/v0/b/trackmate-qa.appspot.com/o/index.html?alt=media&page_n=landing&utm_source=Google&utm_medium=cpc&utm_campaign={}&utm_term=testing&utm_content=logolink&affiliate_id={}\".format(campaign_id,
+    affiliate_id), \"url\": \"https://mag2.14west.us/trackmate_order_page_aw?funnelitemid=13251&choiceparams[0][sku]=OP_637308403401860260.82209&choiceparams[0][item_ids][0]=9221&sessionid=d758cb48-1492-4206-a8ad-10d207ffe8c8&prepop=0&return=https%3A%2F%2Fsales2.14west.us%2FProcessOrderResults%2F578%2F1%3Fpage_n%3Dupsell_1%26tmid%3De026225c-6737-4c12-baee-08e5d5dbad90&status=delay&page_n=order_f&tmid=e026225c-6737-4c12-baee-08e5d5dbad90\"
+    }, \"platform\": platform, \"spec\": \"track_event\", \"utm_variable\": { \"choiceparams[0][item_ids][0]\":
+    \"9221\", \"choiceparams[0][sku]\": \"OP_637308403401860260.82209\", \"funnelitemid\":
+    \"13251\", \"page_n\": \"order_f\", \"prepop\": \"0\", \"return\": \"https://sales2.14west.us/ProcessOrderResults/578/1?page_n=upsell_1&tmid=e026225c-6737-4c12-baee-08e5d5dbad90\",
+    \"sessionid\": \"d758cb48-1492-4206-a8ad-10d207ffe8c8\", \"status\": \"delay\"
+    } },\n            { \"type\": \"\", \"page\": { \"referrer\": \"https://mag2.14west.us/trackmate_order_page_aw?funnelitemid=13251&choiceparams[0][sku]=OP_637308403401860260.82209&choiceparams[0][item_ids][0]=9221&sessionid=d758cb48-1492-4206-a8ad-10d207ffe8c8&prepop=0&return=https%3A%2F%2Fsales2.14west.us%2FProcessOrderResults%2F578%2F1%3Fpage_n%3Dupsell_1%26tmid%3De026225c-6737-4c12-baee-08e5d5dbad90&status=delay&page_n=order_f&tmid=e026225c-6737-4c12-baee-08e5d5dbad90\",
+    \"url\": \"https://sales2.14west.us/p/578/11?sessionid=d758cb48-1492-4206-a8ad-10d207ffe8c8&OrderKey=6DDEF6BF-D95C-0830-81A2-7D00B1AE85CC&page_n=upsell_1&tmid=e026225c-6737-4c12-baee-08e5d5dbad90\"
+    }, \"platform\": platform, \"spec\": \"page\", \"userAgent\": userAgent, \"utm_variable\":
+    { \"OrderKey\": \"6DDEF6BF-D95C-0830-81A2-7D00B1AE85CC\", \"page_n\": \"upsell_1\",
+    \"sessionid\": \"d758cb48-1492-4206-a8ad-10d207ffe8c8\" } },\n            { \"type\":
+    \"scroll_depth\", \"data\": [ { \"label\": \"%\", \"value\": 60 } ], \"page\":
+    { \"referrer\": \"https://mag2.14west.us/trackmate_order_page_aw?funnelitemid=13251&choiceparams[0][sku]=OP_637308403401860260.82209&choiceparams[0][item_ids][0]=9221&sessionid=d758cb48-1492-4206-a8ad-10d207ffe8c8&prepop=0&return=https%3A%2F%2Fsales2.14west.us%2FProcessOrderResults%2F578%2F1%3Fpage_n%3Dupsell_1%26tmid%3De026225c-6737-4c12-baee-08e5d5dbad90&status=delay&page_n=order_f&tmid=e026225c-6737-4c12-baee-08e5d5dbad90\",
+    \"url\": \"https://sales2.14west.us/p/578/11?sessionid=d758cb48-1492-4206-a8ad-10d207ffe8c8&OrderKey=6DDEF6BF-D95C-0830-81A2-7D00B1AE85CC&page_n=upsell_1&tmid=e026225c-6737-4c12-baee-08e5d5dbad90\"
+    }, \"platform\": platform, \"spec\": \"track_event\", \"utm_variable\": { \"OrderKey\":
+    \"6DDEF6BF-D95C-0830-81A2-7D00B1AE85CC\", \"page_n\": \"upsell_1\", \"sessionid\":
+    \"d758cb48-1492-4206-a8ad-10d207ffe8c8\" } },\n            { \"type\": \"scroll_depth\",
+    \"data\": [ { \"label\": \"%\", \"value\": 90 } ], \"page\": { \"referrer\": \"https://mag2.14west.us/trackmate_order_page_aw?funnelitemid=13251&choiceparams[0][sku]=OP_637308403401860260.82209&choiceparams[0][item_ids][0]=9221&sessionid=d758cb48-1492-4206-a8ad-10d207ffe8c8&prepop=0&return=https%3A%2F%2Fsales2.14west.us%2FProcessOrderResults%2F578%2F1%3Fpage_n%3Dupsell_1%26tmid%3De026225c-6737-4c12-baee-08e5d5dbad90&status=delay&page_n=order_f&tmid=e026225c-6737-4c12-baee-08e5d5dbad90\",
+    \"url\": \"https://sales2.14west.us/p/578/11?sessionid=d758cb48-1492-4206-a8ad-10d207ffe8c8&OrderKey=6DDEF6BF-D95C-0830-81A2-7D00B1AE85CC&page_n=upsell_1&tmid=e026225c-6737-4c12-baee-08e5d5dbad90\"
+    }, \"platform\": platform, \"spec\": \"track_event\", \"utm_variable\": { \"OrderKey\":
+    \"6DDEF6BF-D95C-0830-81A2-7D00B1AE85CC\", \"page_n\": \"upsell_1\", \"sessionid\":
+    \"d758cb48-1492-4206-a8ad-10d207ffe8c8\" } },\n            { \"type\": \"scroll_depth\",\"data\":
+    [ { \"label\": \"%\", \"value\": 100 } ], \"page\": { \"referrer\": \"https://mag2.14west.us/trackmate_order_page_aw?funnelitemid=13251&choiceparams[0][sku]=OP_637308403401860260.82209&choiceparams[0][item_ids][0]=9221&sessionid=d758cb48-1492-4206-a8ad-10d207ffe8c8&prepop=0&return=https%3A%2F%2Fsales2.14west.us%2FProcessOrderResults%2F578%2F1%3Fpage_n%3Dupsell_1%26tmid%3De026225c-6737-4c12-baee-08e5d5dbad90&status=delay&page_n=order_f&tmid=e026225c-6737-4c12-baee-08e5d5dbad90\",
+    \"url\": \"https://sales2.14west.us/p/578/11?sessionid=d758cb48-1492-4206-a8ad-10d207ffe8c8&OrderKey=6DDEF6BF-D95C-0830-81A2-7D00B1AE85CC&page_n=upsell_1&tmid=e026225c-6737-4c12-baee-08e5d5dbad90\"
+    }, \"platform\": platform, \"spec\": \"track_event\", \"utm_variable\": { \"OrderKey\":
+    \"6DDEF6BF-D95C-0830-81A2-7D00B1AE85CC\", \"page_n\": \"upsell_1\", \"sessionid\":
+    \"d758cb48-1492-4206-a8ad-10d207ffe8c8\" } },\n            { \"type\": \"link\",
+    \"data\": [ { \"label\": \"link\", \"value\": \"https://mag2.14west.us/op_637308422387364412.88048?sessionid=d758cb48-1492-4206-a8ad-10d207ffe8c8&chain=W3sic2t1IjoiT1BfNjM3MzA4NDIyMzg3MzY0NDEyLjQ1NTI5IiwiaXRlbV9pZHMiOls5MjIzXX1d&return=https%3A%2F%2Fsales2.14west.us%2FProcessOrderResults%2F578%2F11%3Fpage_n%3Dcrosssell%26tmid%3De026225c-6737-4c12-baee-08e5d5dbad90&prevkey=6DDEF6BF-D95C-0830-81A2-7D00B1AE85CC&autorenew=1&page_n=upsell_1&tmid=e026225c-6737-4c12-baee-08e5d5dbad90\"
+    } ], \"page\": { \"referrer\": \"https://mag2.14west.us/trackmate_order_page_aw?funnelitemid=13251&choiceparams[0][sku]=OP_637308403401860260.82209&choiceparams[0][item_ids][0]=9221&sessionid=d758cb48-1492-4206-a8ad-10d207ffe8c8&prepop=0&return=https%3A%2F%2Fsales2.14west.us%2FProcessOrderResults%2F578%2F1%3Fpage_n%3Dupsell_1%26tmid%3De026225c-6737-4c12-baee-08e5d5dbad90&status=delay&page_n=order_f&tmid=e026225c-6737-4c12-baee-08e5d5dbad90\",
+    \"url\": \"https://sales2.14west.us/p/578/11?sessionid=d758cb48-1492-4206-a8ad-10d207ffe8c8&OrderKey=6DDEF6BF-D95C-0830-81A2-7D00B1AE85CC&page_n=upsell_1&tmid=e026225c-6737-4c12-baee-08e5d5dbad90\"
+    }, \"platform\": platform, \"spec\": \"track_event\", \"utm_variable\": { \"OrderKey\":
+    \"6DDEF6BF-D95C-0830-81A2-7D00B1AE85CC\", \"page_n\": \"upsell_1\", \"sessionid\":
+    \"d758cb48-1492-4206-a8ad-10d207ffe8c8\" } },\n            { \"type\": \"time_on_page\",
+    \"data\": [ { \"label\": \"ms\", \"value\": 4644 } ], \"page\": { \"referrer\":
+    \"https://mag2.14west.us/trackmate_order_page_aw?funnelitemid=13251&choiceparams[0][sku]=OP_637308403401860260.82209&choiceparams[0][item_ids][0]=9221&sessionid=d758cb48-1492-4206-a8ad-10d207ffe8c8&prepop=0&return=https%3A%2F%2Fsales2.14west.us%2FProcessOrderResults%2F578%2F1%3Fpage_n%3Dupsell_1%26tmid%3De026225c-6737-4c12-baee-08e5d5dbad90&status=delay&page_n=order_f&tmid=e026225c-6737-4c12-baee-08e5d5dbad90\",
+    \"url\": \"https://sales2.14west.us/p/578/11?sessionid=d758cb48-1492-4206-a8ad-10d207ffe8c8&OrderKey=6DDEF6BF-D95C-0830-81A2-7D00B1AE85CC&page_n=upsell_1&tmid=e026225c-6737-4c12-baee-08e5d5dbad90\"
+    }, \"platform\": platform, \"spec\": \"track_event\", \"utm_variable\": { \"OrderKey\":
+    \"6DDEF6BF-D95C-0830-81A2-7D00B1AE85CC\", \"page_n\": \"upsell_1\", \"sessionid\":
+    \"d758cb48-1492-4206-a8ad-10d207ffe8c8\" } },\n            { \"type\": \"\", \"page\":
+    { \"referrer\": \"https://sales2.14west.us/p/578/11?sessionid=d758cb48-1492-4206-a8ad-10d207ffe8c8&OrderKey=6DDEF6BF-D95C-0830-81A2-7D00B1AE85CC&page_n=upsell_1&tmid=e026225c-6737-4c12-baee-08e5d5dbad90\",
+    \"url\": \"https://sales2.14west.us/p/578/111?sessionid=d758cb48-1492-4206-a8ad-10d207ffe8c8&OrderKey=0C218B0D-8EF9-5F33-CC66-60E49439ADF5&page_n=crosssell&tmid=e026225c-6737-4c12-baee-08e5d5dbad90\"
+    }, \"platform\": platform, \"spec\": \"page\", \"userAgent\": userAgent, \"utm_variable\":
+    { \"OrderKey\": \"0C218B0D-8EF9-5F33-CC66-60E49439ADF5\", \"page_n\": \"crosssell\",
+    \"sessionid\": \"d758cb48-1492-4206-a8ad-10d207ffe8c8\" } },\n            { \"type\":
+    \"scroll_depth\", \"data\": [ { \"label\": \"%\", \"value\": 30 } ], \"page\":
+    { \"referrer\": \"https://sales2.14west.us/p/578/11?sessionid=d758cb48-1492-4206-a8ad-10d207ffe8c8&OrderKey=6DDEF6BF-D95C-0830-81A2-7D00B1AE85CC&page_n=upsell_1&tmid=e026225c-6737-4c12-baee-08e5d5dbad90\",
+    \"url\": \"https://sales2.14west.us/p/578/111?sessionid=d758cb48-1492-4206-a8ad-10d207ffe8c8&OrderKey=0C218B0D-8EF9-5F33-CC66-60E49439ADF5&page_n=crosssell&tmid=e026225c-6737-4c12-baee-08e5d5dbad90\"
+    }, \"platform\": platform, \"spec\": \"track_event\", \"utm_variable\": { \"OrderKey\":
+    \"0C218B0D-8EF9-5F33-CC66-60E49439ADF5\", \"page_n\": \"crosssell\", \"sessionid\":
+    \"d758cb48-1492-4206-a8ad-10d207ffe8c8\" } },\n            { \"type\": \"scroll_depth\",
+    \"data\": [ { \"label\": \"%\", \"value\": 60 } ], \"page\": { \"referrer\": \"https://sales2.14west.us/p/578/11?sessionid=d758cb48-1492-4206-a8ad-10d207ffe8c8&OrderKey=6DDEF6BF-D95C-0830-81A2-7D00B1AE85CC&page_n=upsell_1&tmid=e026225c-6737-4c12-baee-08e5d5dbad90\",
+    \"url\": \"https://sales2.14west.us/p/578/111?sessionid=d758cb48-1492-4206-a8ad-10d207ffe8c8&OrderKey=0C218B0D-8EF9-5F33-CC66-60E49439ADF5&page_n=crosssell&tmid=e026225c-6737-4c12-baee-08e5d5dbad90\"
+    }, \"platform\": platform, \"spec\": \"track_event\", \"utm_variable\": { \"OrderKey\":
+    \"0C218B0D-8EF9-5F33-CC66-60E49439ADF5\", \"page_n\": \"crosssell\", \"sessionid\":
+    \"d758cb48-1492-4206-a8ad-10d207ffe8c8\" } },\n            { \"type\": \"scroll_depth\",
+    \"data\": [ { \"label\": \"%\", \"value\": 90 } ], \"page\": { \"referrer\": \"https://sales2.14west.us/p/578/11?sessionid=d758cb48-1492-4206-a8ad-10d207ffe8c8&OrderKey=6DDEF6BF-D95C-0830-81A2-7D00B1AE85CC&page_n=upsell_1&tmid=e026225c-6737-4c12-baee-08e5d5dbad90\",
+    \"url\": \"https://sales2.14west.us/p/578/111?sessionid=d758cb48-1492-4206-a8ad-10d207ffe8c8&OrderKey=0C218B0D-8EF9-5F33-CC66-60E49439ADF5&page_n=crosssell&tmid=e026225c-6737-4c12-baee-08e5d5dbad90\"
+    }, \"platform\": platform, \"spec\": \"track_event\", \"utm_variable\": { \"OrderKey\":
+    \"0C218B0D-8EF9-5F33-CC66-60E49439ADF5\", \"page_n\": \"crosssell\", \"sessionid\":
+    \"d758cb48-1492-4206-a8ad-10d207ffe8c8\" } },\n            { \"type\": \"scroll_depth\",
+    \"data\": [ { \"label\": \"%\", \"value\": 100 } ], \"page\": { \"referrer\":
+    \"https://sales2.14west.us/p/578/11?sessionid=d758cb48-1492-4206-a8ad-10d207ffe8c8&OrderKey=6DDEF6BF-D95C-0830-81A2-7D00B1AE85CC&page_n=upsell_1&tmid=e026225c-6737-4c12-baee-08e5d5dbad90\",
+    \"url\": \"https://sales2.14west.us/p/578/111?sessionid=d758cb48-1492-4206-a8ad-10d207ffe8c8&OrderKey=0C218B0D-8EF9-5F33-CC66-60E49439ADF5&page_n=crosssell&tmid=e026225c-6737-4c12-baee-08e5d5dbad90\"
+    }, \"platform\": platform, \"spec\": \"track_event\", \"utm_variable\": { \"OrderKey\":
+    \"0C218B0D-8EF9-5F33-CC66-60E49439ADF5\", \"page_n\": \"crosssell\", \"sessionid\":
+    \"d758cb48-1492-4206-a8ad-10d207ffe8c8\" } },\n            { \"type\": \"link\",
+    \"data\": [ { \"label\": \"link\", \"value\": \"https://mag2.14west.us/op_637308425557134231.47055?sessionid=d758cb48-1492-4206-a8ad-10d207ffe8c8&chain=W3sic2t1IjoiT1BfNjM3MzA4NDI1NTU3MTM0MjMxLjUxOTYyIiwiaXRlbV9pZHMiOls5MjI0XX1d&return=https%3A%2F%2Fsales2.14west.us%2FProcessOrderResults%2F578%2F111%3Fpage_n%3Dcrosssell_confirmation_page_1%26tmid%3De026225c-6737-4c12-baee-08e5d5dbad90&autorenew=1&page_n=crosssell&tmid=e026225c-6737-4c12-baee-08e5d5dbad90\"
+    } ], \"page\": { \"referrer\": \"https://sales2.14west.us/p/578/11?sessionid=d758cb48-1492-4206-a8ad-10d207ffe8c8&OrderKey=6DDEF6BF-D95C-0830-81A2-7D00B1AE85CC&page_n=upsell_1&tmid=e026225c-6737-4c12-baee-08e5d5dbad90\",
+    \"url\": \"https://sales2.14west.us/p/578/111?sessionid=d758cb48-1492-4206-a8ad-10d207ffe8c8&OrderKey=0C218B0D-8EF9-5F33-CC66-60E49439ADF5&page_n=crosssell&tmid=e026225c-6737-4c12-baee-08e5d5dbad90\"
+    }, \"platform\": platform, \"spec\": \"track_event\", \"utm_variable\": { \"OrderKey\":
+    \"0C218B0D-8EF9-5F33-CC66-60E49439ADF5\", \"page_n\": \"crosssell\", \"sessionid\":
+    \"d758cb48-1492-4206-a8ad-10d207ffe8c8\" } },\n            { \"type\": \"time_on_page\",
+    \"data\": [ { \"label\": \"ms\", \"value\": 6068 } ], \"page\": { \"referrer\":
+    \"https://sales2.14west.us/p/578/11?sessionid=d758cb48-1492-4206-a8ad-10d207ffe8c8&OrderKey=6DDEF6BF-D95C-0830-81A2-7D00B1AE85CC&page_n=upsell_1&tmid=e026225c-6737-4c12-baee-08e5d5dbad90\",
+    \"url\": \"https://sales2.14west.us/p/578/111?sessionid=d758cb48-1492-4206-a8ad-10d207ffe8c8&OrderKey=0C218B0D-8EF9-5F33-CC66-60E49439ADF5&page_n=crosssell&tmid=e026225c-6737-4c12-baee-08e5d5dbad90\"
+    }, \"platform\": platform, \"spec\": \"track_event\", \"utm_variable\": { \"OrderKey\":
+    \"0C218B0D-8EF9-5F33-CC66-60E49439ADF5\", \"page_n\": \"crosssell\", \"sessionid\":
+    \"d758cb48-1492-4206-a8ad-10d207ffe8c8\" } },\n            { \"type\": \"\", \"page\":
+    { \"referrer\": \"https://sales2.14west.us/p/578/111?sessionid=d758cb48-1492-4206-a8ad-10d207ffe8c8&OrderKey=0C218B0D-8EF9-5F33-CC66-60E49439ADF5&page_n=crosssell&tmid=e026225c-6737-4c12-baee-08e5d5dbad90\",
+    \"url\": \"https://sales2.14west.us/p/578/1111?sessionid=d758cb48-1492-4206-a8ad-10d207ffe8c8&OrderKey=E612CA85-7546-4B49-2629-082C8E8765F7&page_n=crosssell_confirmation_page_1&tmid=e026225c-6737-4c12-baee-08e5d5dbad90\"
+    }, \"platform\": platform, \"spec\": \"page\", \"userAgent\": userAgent, \"utm_variable\":
+    { \"OrderKey\": \"E612CA85-7546-4B49-2629-082C8E8765F7\", \"page_n\": \"crosssell_confirmation_page_1\",
+    \"sessionid\": \"d758cb48-1492-4206-a8ad-10d207ffe8c8\" } }\n          ]\n       ]\n        \n
+    \       for event in random.choice(events):\n            payload = post_event(event,
+    affiliate_id, campaign_id, journey_id)\n            response = self.client.post(test_url,
+    data=payload, headers=headers)\n            print_resp(response)\n"
+

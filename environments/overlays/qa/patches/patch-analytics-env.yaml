@@ -1,0 +1,54 @@
+- op: add
+  path: "/spec/template/spec/containers/0/env/-"
+  value:
+    name: TRACKMATE_COUCHBASE_ANALYTICS_SERVICE_NOOP
+    value: noop
+
+- op: add
+  path: "/spec/template/spec/containers/0/env/-"
+  value:
+    name: TRACKMATE_COUCHBASE_ANALYTICS_SERVICE_CORS_DOMAIN_WHITE_LIST
+    value: '[''https://app-14west-trackmate.apps.c4.us-east-1.dev.aws.ocp.14west.io'',''https://dev.tfd.ie:8080'',''https://www.test-cors.org'',
+            ''https://trackmate.tk'']'
+
+- op: add
+  path: "/spec/template/spec/containers/0/env/-"
+  value:
+    name: TRACKMATE_COUCHBASE_ANALYTICS_SERVICE_JWT_AUTH_ON
+    value: "true"
+
+- op: add
+  path: "/spec/template/spec/containers/0/env/-"
+  value:
+    name: TRACKMATE_COUCHBASE_ANALYTICS_SERVICE_API_KEY_AUTH_ON
+    value: "false"
+
+- op: add
+  path: "/spec/template/spec/containers/0/env/-"
+  value:
+    name: TRACKMATE_COUCHBASE_ANALYTICS_SERVICE_AUTHENTICATION_API
+    value: authentication.14west-trackmate-qa
+
+- op: add
+  path: "/spec/template/spec/containers/0/env/-"
+  value:
+    name: TRACKMATE_COUCHBASE_ANALYTICS_SERVICE_WEIGHT_FLOOR
+    value: "0"
+
+- op: add
+  path: "/spec/template/spec/containers/0/env/-"
+  value:
+    name: TRACKMATE_COUCHBASE_ANALYTICS_SERVICE_COUCHBASE_HOST
+    value: cb-ha-cluster.devops-shared-threefld
+
+- op: add
+  path: "/spec/template/spec/containers/0/env/-"
+  value:
+    name: TRACKMATE_COUCHBASE_ANALYTICS_SERVICE_COUCHBASE_BUCKET_OPERATION_TIMEOUT
+    value: "10000"
+
+- op: add
+  path: "/spec/template/spec/containers/0/env/-"
+  value:
+    name: TRACKMATE_COUCHBASE_ANALYTICS_SERVICE_CORS_ON
+    value: "true"

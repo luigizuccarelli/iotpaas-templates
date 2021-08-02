@@ -1,0 +1,6 @@
+commonLabels:
+  app: iotpaas-message-consumer
+  name: iotpaas-message-consumer
+resources:
+  - deployment.yaml
+  - service.yaml

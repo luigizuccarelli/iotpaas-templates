@@ -1,0 +1,4 @@
+resources:
+    - admin.yaml
+    - edit.yaml
+    - view.yaml

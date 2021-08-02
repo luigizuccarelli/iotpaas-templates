@@ -1,0 +1,188 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+bases:
+  - ../../../manifests/apps/rbac/base/
+  - ../../../manifests/apps/message-consumer/base/
+  - ../../../manifests/apps/message-producer/base/
+  - ../../../manifests/apps/authentication/base/
+  - ../../../manifests/apps/affiliate/base/
+  - ../../../manifests/apps/trackmate-couchbase-analytics-service/base/
+  - ../../../manifests/apps/nginx-proxy/base/
+  - ../../../manifests/apps/redis/base/
+resources:
+  - namespace/namespace.yaml
+  - namespace/limit-range.yaml
+  - namespace/resource-quota.yaml
+  - shared/quay-secret.yaml
+  - shared/redis-secret.yaml
+  - shared/trackmate-secret.yaml
+  - shared/nginx-configmap.yaml
+namespace: 14west-trackmate-qa
+
+
+patchesJson6902:
+  # message-consumer patches
+  - path: patches/patch-message-consumer-resources.yaml
+    target:
+      group: apps.openshift.io
+      kind: DeploymentConfig
+      name: message-consumer
+      version: v1
+  - path: patches/patch-message-consumer-replicas.yaml
+    target:
+      group: apps.openshift.io
+      kind: DeploymentConfig
+      name: message-consumer
+      version: v1
+  - path: patches/patch-message-consumer-image.yaml
+    target:
+      group: apps.openshift.io
+      kind: DeploymentConfig
+      name: message-consumer
+      version: v1
+  - path: patches/patch-message-consumer-env.yaml
+    target:
+      group: apps.openshift.io
+      kind: DeploymentConfig
+      name: message-consumer
+      version: v1
+
+  # message-producer patches
+  - path: patches/patch-message-producer-resources.yaml
+    target:
+      group: apps.openshift.io
+      kind: DeploymentConfig
+      name: message-producer
+      version: v1
+  - path: patches/patch-message-producer-replicas.yaml
+    target:
+      group: apps.openshift.io
+      kind: DeploymentConfig
+      name: message-producer
+      version: v1
+  - path: patches/patch-message-producer-image.yaml
+    target:
+      group: apps.openshift.io
+      kind: DeploymentConfig
+      name: message-producer
+      version: v1
+  - path: patches/patch-message-producer-env.yaml
+    target:
+      group: apps.openshift.io
+      kind: DeploymentConfig
+      name: message-producer
+      version: v1
+
+  # authentication patches
+  - path: patches/patch-authentication-resources.yaml
+    target:
+      group: apps.openshift.io
+      kind: DeploymentConfig
+      name: authentication
+      version: v1
+  - path: patches/patch-authentication-replicas.yaml
+    target:
+      group: apps.openshift.io
+      kind: DeploymentConfig
+      name: authentication
+      version: v1
+  - path: patches/patch-authentication-image.yaml
+    target:
+      group: apps.openshift.io
+      kind: DeploymentConfig
+      name: authentication
+      version: v1
+  - path: patches/patch-authentication-env.yaml
+    target:
+      group: apps.openshift.io
+      kind: DeploymentConfig
+      name: authentication
+      version: v1
+
+
+  # affiliate patches
+  - path: patches/patch-affiliate-resources.yaml
+    target:
+      group: apps.openshift.io
+      kind: DeploymentConfig
+      name: affiliate
+      version: v1
+  - path: patches/patch-affiliate-replicas.yaml
+    target:
+      group: apps.openshift.io
+      kind: DeploymentConfig
+      name: affiliate
+      version: v1
+  - path: patches/patch-affiliate-image.yaml
+    target:
+      group: apps.openshift.io
+      kind: DeploymentConfig
+      name: affiliate
+      version: v1
+  - path: patches/patch-affiliate-env.yaml
+    target:
+      group: apps.openshift.io
+      kind: DeploymentConfig
+      name: affiliate
+      version: v1
+
+
+  # trackmate-couchbase-analytics-service patches
+  - path: patches/patch-analytics-resources.yaml
+    target:
+      group: apps.openshift.io
+      kind: DeploymentConfig
+      name: trackmate-couchbase-analytics-service
+      version: v1
+  - path: patches/patch-analytics-replicas.yaml
+    target:
+      group: apps.openshift.io
+      kind: DeploymentConfig
+      name: trackmate-couchbase-analytics-service
+      version: v1
+  - path: patches/patch-analytics-image.yaml
+    target:
+      group: apps.openshift.io
+      kind: DeploymentConfig
+      name: trackmate-couchbase-analytics-service
+      version: v1
+  - path: patches/patch-analytics-env.yaml
+    target:
+      group: apps.openshift.io
+      kind: DeploymentConfig
+      name: trackmate-couchbase-analytics-service
+      version: v1
+
+  # nginx-proxy patches
+  - path: patches/patch-nginx-proxy-image.yaml
+    target:
+      group: apps.openshift.io
+      kind: DeploymentConfig
+      name: nginx-proxy
+      version: v1
+  - path: patches/patch-nginx-proxy-env.yaml
+    target:
+      group: apps.openshift.io
+      kind: DeploymentConfig
+      name: nginx-proxy
+      version: v1
+  # - path: patches/patch-nginx-proxy-route-env.yaml
+  #   target:
+  #     group: route.openshift.io
+  #     kind: Route
+  #     name: app
+  #     version: v1
+
+  # redis
+  - path: patches/patch-redis-resources.yaml
+    target:
+      group: apps.openshift.io
+      kind: DeploymentConfig
+      name: redis
+      version: v1
+  - path: patches/patch-redis-replicas.yaml
+    target:
+      group: apps.openshift.io
+      kind: DeploymentConfig
+      name: redis
+      version: v1

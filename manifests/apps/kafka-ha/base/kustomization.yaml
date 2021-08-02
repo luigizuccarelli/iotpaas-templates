@@ -1,0 +1,7 @@
+namePrefix: kafka-ha-
+commonLabels:
+  app: kafka-ha
+resources:
+  - cluster.yaml
+  - analytics-topic.yaml
+  - trackmate-topic.yaml

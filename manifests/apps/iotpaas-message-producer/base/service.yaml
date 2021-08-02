@@ -1,0 +1,17 @@
+kind: Service
+apiVersion: v1
+metadata:
+  labels:
+    app: iotpaas-message-producer
+    name: iotpass-message-producer
+  name: iotpaas-message-producer
+spec:
+  ports:
+  - name: stream-port
+    port: 9000
+    protocol: TCP
+    targetPort: 9000
+  selector:
+    name: iotpaas-message-producer
+  sessionAffinity: None
+  type: ClusterIP

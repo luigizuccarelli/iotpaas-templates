@@ -1,0 +1,17 @@
+- op: add
+  path: "/spec/template/spec/containers/0/env/-"
+  value:
+    name: AFFILIATE_APP_AUTHENTICATION_API
+    value: authentication.14west-trackmate-dev
+
+- op: add
+  path: "/spec/template/spec/containers/0/env/-"
+  value:
+    name: AFFILIATE_APP_MONGODB_REPLICA_SET_CONNECTION_STRING
+    value: mongodb-ha-service.devops-shared-threefld-dev:27017
+
+- op: add
+  path: "/spec/template/spec/containers/0/env/-"
+  value:
+    name: AFFILIATE_APP_NOOP
+    value: noop11

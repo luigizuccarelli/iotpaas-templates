@@ -1,0 +1,15 @@
+apiVersion: couchbase.com/v2
+kind: CouchbaseBucket
+metadata:
+  name: analytics
+spec:
+  name: analytics
+  memoryQuota: 512Mi
+  replicas: 1
+  ioPriority: high
+  evictionPolicy: valueOnly
+  conflictResolution: lww
+  enableFlush: true
+  enableIndexReplica: true
+  compressionMode: passive
+  #maxTTL: "86400"

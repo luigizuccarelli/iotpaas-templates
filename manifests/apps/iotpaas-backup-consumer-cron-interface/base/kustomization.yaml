@@ -1,0 +1,6 @@
+commonLabels:
+  app: backup-consumer-cron-interface
+  name: backup-consumer-cron-interface
+resources:
+  - deployment-config.yaml
+  - service.yaml
