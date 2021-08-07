@@ -2,11 +2,17 @@
   path: "/spec/template/spec/containers/0/env/-"
   value:
     name: KAFKA_BROKERS
-    value: kafka-cluster-kafka-brokers.kafka.cluster.svc.local:9092
+    value: kafka-cluster-kafka-brokers.kafka.svc.cluster.local:9092
 
 - op: add
   path: "/spec/template/spec/containers/0/env/-"
   value:
-    name: COUCHBASE_HOST
-    value: cb-example.couchbase-ha.cluster.svc.local
+    name: REDIS_HOST
+    value: redis-service.redis.svc.cluster.local
+
+- op: add
+  path: "/spec/template/spec/containers/0/env/-"
+  value:
+    name: REDIS_PASSWORD
+    value: ""
 
