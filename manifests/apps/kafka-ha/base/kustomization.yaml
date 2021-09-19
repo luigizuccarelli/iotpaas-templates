@@ -2,6 +2,7 @@ namePrefix: kafka-ha-
 commonLabels:
   app: kafka-ha
 resources:
-  - cluster.yaml
-  - analytics-topic.yaml
-  - trackmate-topic.yaml
+  - cluster-persistence.yaml 
+  - topic.yaml
+
+  # apply the kustomize after executing kubectl create -f kafka-install.yaml

@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: 14west-trackmate-uat
+  name: redis-cluster
   labels:
     cost-tenancy: Dedicated
     dept: Development
-    org: Threefld
-    network-share: threefld
-    product: trackmate
+    org: private
+    network-share: private
+    product: redis

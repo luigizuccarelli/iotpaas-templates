@@ -2,6 +2,64 @@ commonLabels:
   app: redis
   name: redis
 resources:
-  - deployment-config.yaml
+  - namespace.yaml
+  - configmap.yaml
+  - statefulset.yaml
   - service.yaml
-  - storage.yaml
+
+  # execute the following command on completetion of deployment
+  # IPS=$(kubectl -n redis-cluster get pods -o jsonpath='{range.items[*]}{.status.podIP}:6379 ')
+  # kubectl exec -it redis-cluster-0 -- /bin/sh
+  # redis-cli --cluster create --cluster-replicas 1 $(IPS)
+  #
+  # result should be in the form
+  #
+  #>>> Performing hash slots allocation on 6 nodes...
+  #Master[0] -> Slots 0 - 5460
+  #Master[1] -> Slots 5461 - 10922
+  #Master[2] -> Slots 10923 - 16383
+  #Adding replica 10.0.32.194:6379 to 10.0.58.133:6379
+  #Adding replica 10.0.133.5:6379 to 10.0.58.134:6379
+  #Adding replica 10.0.58.135:6379 to 10.0.133.4:6379
+  #M: 9d0ceae9a8f6bca18edfa54aa9b22b08fe774fb0 10.0.58.133:6379
+  #   slots:[0-5460] (5461 slots) master
+  #M: 64cc7a4f26c7801d6fd6c3636e6888d1b3890363 10.0.58.134:6379
+  #   slots:[5461-10922] (5462 slots) master
+  #M: 02a6c53473abdc9ffd0e44164a38ed47e1820a1c 10.0.133.4:6379
+  # slots:[10923-16383] (5461 slots) master
+  #S: ea89a4f9bf15b2cb5d9780d3853da39e81ced407 10.0.32.194:6379
+  #   replicates 9d0ceae9a8f6bca18edfa54aa9b22b08fe774fb0
+  #S: 1873b9e1501fce0863eba068625a83bf06fb1916 10.0.133.5:6379
+  #   replicates 64cc7a4f26c7801d6fd6c3636e6888d1b3890363
+  #S: 76e2f0a80b9ffd41a96e73f9f50c2214a9e1715b 10.0.58.135:6379
+  #   replicates 02a6c53473abdc9ffd0e44164a38ed47e1820a1c
+  #Can I set the above configuration? (type 'yes' to accept): yes
+  #>>> Nodes configuration updated
+  #>>> Assign a different config epoch to each node
+  #>>> Sending CLUSTER MEET messages to join the cluster
+  #Waiting for the cluster to join
+  #...
+  #>>> Performing Cluster Check (using node 10.0.58.133:6379)
+  #M: 9d0ceae9a8f6bca18edfa54aa9b22b08fe774fb0 10.0.58.133:6379
+  #   slots:[0-5460] (5461 slots) master
+  #   1 additional replica(s)
+  #M: 64cc7a4f26c7801d6fd6c3636e6888d1b3890363 10.0.58.134:6379
+  #   slots:[5461-10922] (5462 slots) master
+  #   1 additional replica(s)
+  #S: 76e2f0a80b9ffd41a96e73f9f50c2214a9e1715b 10.0.58.135:6379
+  #   slots: (0 slots) slave
+  #   replicates 02a6c53473abdc9ffd0e44164a38ed47e1820a1c
+  #M: 02a6c53473abdc9ffd0e44164a38ed47e1820a1c 10.0.133.4:6379
+  #   slots:[10923-16383] (5461 slots) master
+  #   1 additional replica(s)
+  #S: ea89a4f9bf15b2cb5d9780d3853da39e81ced407 10.0.32.194:6379
+  #   slots: (0 slots) slave
+  #   replicates 9d0ceae9a8f6bca18edfa54aa9b22b08fe774fb0
+  #S: 1873b9e1501fce0863eba068625a83bf06fb1916 10.0.133.5:6379
+  #   slots: (0 slots) slave
+  #   replicates 64cc7a4f26c7801d6fd6c3636e6888d1b3890363
+  #[OK] All nodes agree about slots configuration.
+  #>>> Check for open slots...
+  #>>> Check slots coverage...
+  #[OK] All 16384 slots covered.
+

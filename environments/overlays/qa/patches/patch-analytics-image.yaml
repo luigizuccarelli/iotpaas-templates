@@ -1,3 +1,0 @@
-- op: replace
-  path: "/spec/template/spec/containers/0/image"
-  value: quay.io/14west/trackmate-couchbase-analytics-service:1.0.0

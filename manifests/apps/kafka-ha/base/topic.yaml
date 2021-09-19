@@ -1,0 +1,14 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: iotdata
+  namespace: kafka
+  labels:
+    strimzi.io/cluster: "kafka-cluster"
+spec:
+  partitions: 5
+  replicas: 1
+  config:
+    retention.ms: 300000
+    segment.bytes: 1073741824
+

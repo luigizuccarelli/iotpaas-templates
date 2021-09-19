@@ -1,6 +1,0 @@
-- op: add
-  path: "/spec/template/spec/containers/0/env/-"
-  value:
-    name: KAFKA_BROKERS
-    value: kafka-cluster-kafka-brokers.kafka.cluster.svc.local:9092
-

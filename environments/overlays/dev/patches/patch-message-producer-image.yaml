@@ -1,3 +1,0 @@
-- op: replace
-  path: "/spec/template/spec/containers/0/image"
-  value: quay.io/luigizuccarelli/iotpaas-message-producer:1.16.6
