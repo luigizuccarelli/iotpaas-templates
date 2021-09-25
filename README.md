@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a howto to install the iot-paas ecosystem
+This is a howto to install the IOTPAAS ecosystem
 
 Its covers the installation of :
 
@@ -13,6 +13,7 @@ Its covers the installation of :
 - iotpaas-auth-service
 - iotpaas-nginx-api gateway service (and configmap)
 - iotpass-infra-pg (grafana & prometheus)
+- infra-golang-cicd (generic golang based cicd based on tekton)
 
 The installation of couchbase is not covered, this should be fairly straightforward using the couchabse operator
 
@@ -21,7 +22,7 @@ There is a iotpaas-message-consumer for couchbase that must be used with couchba
 
 ## Installation
 
-Clone the iotpaas-templates repo and 'cd' into the repo
+cd into the repo iotpaas-templates (the repo is a submodule to the iotpaas-project)
 
 
 ### Requirements
@@ -36,7 +37,7 @@ Execute the following commands
 ```
 $ kustomize build manifests/apps/redis/base | kubectl apply -f-
 $ # monitor the deployment
-$ kubectl get all -n redic-cluster
+$ kubectl get all -n redis-cluster
 $ # once deployed execute the following
 $ IPS=$(kubectl -n redis-cluster get pods -o jsonpath='{range.items[*]}{.status.podIP}:6379 ')
 $ kubectl exec -it redis-cluster-0 -- /bin/sh
@@ -138,15 +139,15 @@ $ # load the file 'IOTPaaS [Whitebox Appplication Metrics]-1628494542444.json' f
 
 This assumes that 
 - Tekton has been installed
-- Gitea is installed and setup (webhook)
 - The golang-gitwebhook-service is deployed [https://github.com/luigizuccarelli/golang-gitwebhook-service]
+- Gitea is installed and setup with webhook - (url for golang-gitwebhook-service)
+  - Info : the eventListener uses the schema as defined in gitea repo
 - The golang cicd repo gitea is installed and setup with the repos to build your golang projects
 
 The golang cicd pipeline repo is [https://github.com/luigizuccarelli/infra-golang-cicd]
 
 Clone and 'cd' into the repo then execute the following
 
-The eventListener uses the schema as defined in gitea repo
 
 ```
 $ kustomize build environments/overlays/cicd | kubectl apply -f-
