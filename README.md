@@ -124,8 +124,8 @@ Its left up to the user to configure and deploy the other services
 
 ### Install IOTPAAS Observability
 
-The observability install is in this repo [https://github.com/luigizuccarelli/iotpaas-infra-pg]
-Clone the repo and cd into the repo and execute the following
+'cd' to the directory iotpaas-infra-pg (the repo is a submodule to the iotpaas-project)
+Execute the following
 
 ```
 $ kustomize build environmenst/overlays/prod | kubectl apply -f-
